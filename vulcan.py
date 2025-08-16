@@ -19,10 +19,10 @@
 #   chem_funs.py
 #   NCHO_photo_network.txt (or other text file for the chemical network)
 #   op.py
-#   make_chem_funs.py
-#   store.py
-#   vulcan.py
-#   vulcan_cfg.py
+#   make_chem_funs.py REPLACED
+#   store.py REPLACED
+#   vulcan.py REPLACED  
+#   vulcan_cfg_Earth.py 
 #   
 # - Subdirectories:
 #   /atm/ - for the atmospheric input files
@@ -75,7 +75,7 @@ except:
     raise IOError ('\nThe module "chem_funs" does not exist.\nPlease run prepipe.py first to create the module...')
      
 # import the configuration inputs
-import vulcan_cfg
+import vulcan_cfg_Earth
 from phy_const import kb, Navo
 
 # Setting the current working directory to the script location
@@ -88,12 +88,12 @@ np.set_printoptions(threshold=np.inf)  # print all for debuging
 
 species = chem_funs.spec_list
 ### read in the basic chemistry data
-with open(vulcan_cfg.com_file, 'r') as f:
+with open(vulcan_cfg_Earth.com_file, 'r') as f:
     columns = f.readline() # reading in the first line
     num_ele = len(columns.split())-2 # number of elements (-2 for removing "species" and "mass") 
 type_list = ['int' for i in range(num_ele)]
 type_list.insert(0,'U20'); type_list.append('float')
-compo = np.genfromtxt(vulcan_cfg.com_file,names=True,dtype=type_list)
+compo = np.genfromtxt(vulcan_cfg_Earth.com_file,names=True,dtype=type_list)
 # dtype=None in python 2.X but Sx -> Ux in python3
 compo_row = list(compo['species'])
 ### read in the basic chemistry data
@@ -121,7 +121,7 @@ data_atm =  make_atm.load_TPK(data_atm)
 # construct Dzz (molecular diffusion)
 
 # calculating the saturation pressure
-if vulcan_cfg.use_condense == True: make_atm.sp_sat(data_atm)
+if vulcan_cfg_Earth.use_condense == True: make_atm.sp_sat(data_atm)
 
 # for reading rates
 rate = op.ReadRate()
@@ -130,7 +130,7 @@ rate = op.ReadRate()
 data_var = rate.read_rate(data_var, data_atm)
 
 # for low-T rates e.g. Jupiter       
-if vulcan_cfg.use_lowT_limit_rates == True: data_var = rate.lim_lowT_rates(data_var, data_atm)
+if vulcan_cfg_Earth.use_lowT_limit_rates == True: data_var = rate.lim_lowT_rates(data_var, data_atm)
     
 # reversing rates
 data_var = rate.rev_rate(data_var, data_atm)
@@ -148,7 +148,7 @@ data_var = ini_abun.ele_sum(data_var)
 data_atm = make_atm.f_mu_dz(data_var, data_atm, output)
 
 # after dz is calculated
-# Only setting up ms (the species molecular weight) if vulcan_cfg.use_moldiff == False
+# Only setting up ms (the species molecular weight) if vulcan_cfg_Earth_Earth.use_moldiff == False
 make_atm.mol_diff(data_atm)
 
 # specify the BC
@@ -158,12 +158,12 @@ make_atm.BC_flux(data_atm)
 # ============== Execute VULCAN  ==============
 # time-steping in the while loop until conv() returns True or count > count_max 
 
-# setting the numerical solver to the desinated one in vulcan_cfg
-solver_str = vulcan_cfg.ode_solver
+# setting the numerical solver to the desinated one in vulcan_cfg_Earth_Earth
+solver_str = vulcan_cfg_Earth.ode_solver
 solver = getattr(op, solver_str)()
 
 # Setting up for photo chemistry
-if vulcan_cfg.use_photo == True:
+if vulcan_cfg_Earth.use_photo == True:
     rate.make_bins_read_cross(data_var, data_atm)
     #rate.read_cross(data_var)
     make_atm.read_sflux(data_var, data_atm)

@@ -8,8 +8,8 @@
 
 import numpy as np
 import scipy
-import vulcan_cfg
-from vulcan_cfg import nz
+import vulcan_cfg_Earth
+from vulcan_cfg_Earth import nz
 from chem_funs import ni, nr, spec_list  # number of species and reactions in the network
 
 #from numba import jitclass
@@ -29,7 +29,7 @@ class Variables(object):
         self.ymix = np.zeros((nz, ni)) # current mixing ratios
         self.y_ini = np.zeros((nz, ni)) # the initial number density 
         self.t = 0 # integration time
-        self.dt = vulcan_cfg.dttry # time step
+        self.dt = vulcan_cfg_Earth.dttry # time step
         self.dy = 1. # the max change of y from the previous step to current step 
         self.dy_prev = 1. # the max change of y from i-2 step to i-1 step 
         self.dydt = 1. # the max change of dy/dt
@@ -60,7 +60,7 @@ class Variables(object):
         self.k_fun, self.k_inf = [{} for i in range(2)] 
         self.photo_sp = set()  
         self.pho_rate_index, self.n_branch, self.wavelen = {}, {}, {}
-        #if vulcan_cfg.use_ion == True:
+        #if vulcan_cfg_Earth.use_ion == True:
         self.ion_rate_index, self.ion_branch, self.ion_wavelen, self.ion_br_ratio = {}, {}, {}, {}
         self.charge_list, self.ion_sp = [], set() # charge_list: list of species with non-zero charge; ion_sp: species subjected to photoionisation
         
@@ -73,7 +73,7 @@ class Variables(object):
         
         # The temporary wavelegth range (nm) given by the stellar flux
         # It will later be adjusted in make_bins_read_cross in op.py considering all molecules the absorbe photons, taking the smaller range of the two 
-        sflux_data = np.genfromtxt(vulcan_cfg.sflux_file, dtype=float, skip_header=1, names = ['lambda', 'flux'])
+        sflux_data = np.genfromtxt(vulcan_cfg_Earth.sflux_file, dtype=float, skip_header=1, names = ['lambda', 'flux'])
         
         # setting the spectral bins based on the stellar spectrum, bun not shorter than 2nm ann not longer than 700 nm. This will further be ajusted in op.py while reading cross sections
         self.def_bin_min = max(sflux_data['lambda'][0],2.)  
@@ -82,10 +82,10 @@ class Variables(object):
         # Define what variables to save in the output file!
         self.var_save = ['k','y','ymix','y_ini','t','dt','longdy','longdydt',\
         'atom_ini','atom_sum','atom_loss','atom_conden','aflux_change','Rf'] 
-        if vulcan_cfg.use_photo == True: 
+        if vulcan_cfg_Earth.use_photo == True: 
             self.var_save.extend(['nbin','bins','dbin1','dbin2','tau','sflux','aflux','cross','cross_scat','cross_J', 'J_sp','n_branch'])
-            if vulcan_cfg.T_cross_sp: self.var_save.extend(['cross_J','cross_T'])
-            if vulcan_cfg.use_ion == True: self.var_save.extend(['charge_list', 'ion_sp', 'cross_Jion','Jion_sp', 'ion_wavelen','ion_branch','ion_br_ratio'])
+            if vulcan_cfg_Earth.T_cross_sp: self.var_save.extend(['cross_J','cross_T'])
+            if vulcan_cfg_Earth.use_ion == True: self.var_save.extend(['charge_list', 'ion_sp', 'cross_Jion','Jion_sp', 'ion_wavelen','ion_branch','ion_br_ratio'])
         # 'ion_list' stores all the non-neutral species in build.atm whereas 'ion_sp' is for the species that actually have ionisation reactions in the network 
         self.var_evol_save = ['y_time','t_time']
         self.conden_re_list = []
@@ -113,7 +113,7 @@ class AtmData(object):
     store the data of atmospheric structure  
     """
     def __init__(self):
-        self.pco = np.logspace(np.log10(vulcan_cfg.P_b),np.log10(vulcan_cfg.P_t),nz) # pressure grids
+        self.pco = np.logspace(np.log10(vulcan_cfg_Earth.P_b),np.log10(vulcan_cfg_Earth.P_t),nz) # pressure grids
         self.pico = np.empty(nz+1) # pressure grids at the interface
         self.dz = np.zeros(nz) # height grids
         self.dzi = np.zeros(nz-1) # height grids at the interface
@@ -132,7 +132,7 @@ class AtmData(object):
         self.vm = np.zeros((nz,ni)) # molecular diffusion (nz,ni)
         self.vs = np.zeros((nz-1,ni)) # the settling velocity
         self.alpha = np.zeros(ni) # thermal diffusion factor = -0.25 for every species except for H and H2 (defined in mol_diff() in build_atm.py)
-        self.gs = vulcan_cfg.gs # the gravitational acceleration at the surface or at 1 bar
+        self.gs = vulcan_cfg_Earth.gs # the gravitational acceleration at the surface or at 1 bar
         self.g = np.zeros(nz) # g(z) 
         
         self.top_flux = np.zeros(ni) # the assigned flux at the top boundary
@@ -146,23 +146,23 @@ class AtmData(object):
         self.conden_min_lev = {} # the level of cold trap (sp dependent; for fixing the condensation only below the cold trap )
         
         # excluding non-gaseous species while computing ymix from y
-        self.gas_indx = [_ for _ in range(ni) if spec_list[_] not in vulcan_cfg.non_gas_sp]
+        self.gas_indx = [_ for _ in range(ni) if spec_list[_] not in vulcan_cfg_Earth.non_gas_sp]
                     
         self.fix_sp_indx = {}
-        if hasattr(vulcan_cfg, "fix_species"): # if fix_species is defined in vulcan_cfg
-            for sp in vulcan_cfg.fix_species:
+        if hasattr(vulcan_cfg_Earth, "fix_species"): # if fix_species is defined in vulcan_cfg_Earth
+            for sp in vulcan_cfg_Earth.fix_species:
                 self.fix_sp_indx[sp] = np.arange(spec_list.index(sp), spec_list.index(sp) + ni*nz, ni)
         
         # turning of df(e) while using charge conservation. it'll be very slow if not doing this
-        if vulcan_cfg.use_ion == True: self.fix_e_indx = np.arange(spec_list.index('e'), spec_list.index('e') + ni*nz, ni)
+        if vulcan_cfg_Earth.use_ion == True: self.fix_e_indx = np.arange(spec_list.index('e'), spec_list.index('e') + ni*nz, ni)
         
         # TEST condensation excluding non-gaseous species
         self.r_p, self.rho_p = {}, {}
-        if vulcan_cfg.use_condense == True:
-            for sp in vulcan_cfg.r_p.keys():
-                self.r_p[sp] = vulcan_cfg.r_p[sp]
-            for sp in vulcan_cfg.rho_p.keys():
-                self.rho_p[sp] = vulcan_cfg.rho_p[sp]  
+        if vulcan_cfg_Earth.use_condense == True:
+            for sp in vulcan_cfg_Earth.r_p.keys():
+                self.r_p[sp] = vulcan_cfg_Earth.r_p[sp]
+            for sp in vulcan_cfg_Earth.rho_p.keys():
+                self.rho_p[sp] = vulcan_cfg_Earth.rho_p[sp]  
             
             self.conden_status = np.zeros(nz, dtype=bool)
             

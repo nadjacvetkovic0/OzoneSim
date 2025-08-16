@@ -2,14 +2,14 @@
 
 import sys, os
 import numpy as np
-import vulcan_cfg
+import vulcan_cfg_Earth
 # for constructing the symbolic Jacobian matrix
 from sympy import sin, cos, Matrix
 from sympy import Symbol
 from sympy import lambdify
 
 ofname = 'chem_funs.py'
-gibbs_text = vulcan_cfg.gibbs_text
+gibbs_text = vulcan_cfg_Earth.gibbs_text
 
 
 # read the network and produce the .txt table for chemdf
@@ -23,7 +23,7 @@ def read_network():
     conden_re = False
     re_end = False
     
-    if vulcan_cfg.use_photo==True: ofstr = '# Chemical Network and Photolysis Reactions \n\n'
+    if vulcan_cfg_Earth.use_photo==True: ofstr = '# Chemical Network and Photolysis Reactions \n\n'
     else: ofstr = '# Chemical Network without Photochemistry \n\n'
     
     photo_str = '# photochemistry \n\n'
@@ -32,7 +32,7 @@ def read_network():
     new_network = ''
     photo_re_indx = 0 # The index of first photodissoication reaction 
        
-    with open(vulcan_cfg.network, 'r') as f:
+    with open(vulcan_cfg_Earth.network, 'r') as f:
         for line in f.readlines():
 
             # switch to 3-body and dissociation reations 
@@ -71,7 +71,7 @@ def read_network():
                 # updating the numerical index in the network (1, 3, ...)
                 line = '{:<4d} {:s}'.format(i, "".join(line.partition('[')[1:]))
                 
-                if not (vulcan_cfg.use_photo == False and photo_re == True):
+                if not (vulcan_cfg_Earth.use_photo == False and photo_re == True):
                     ofstr += re_label + str(i) + '\n'
                     ofstr +=  Rf[i] + '\n'
                     
@@ -106,7 +106,7 @@ def read_network():
                 i += 2
             new_network += line
     
-    with open(vulcan_cfg.network, 'w+') as f: f.write(new_network)
+    with open(vulcan_cfg_Earth.network, 'w+') as f: f.write(new_network)
     return ofstr, photo_str, photo_re_indx
 
 
@@ -349,7 +349,7 @@ def make_chemdf(re_table, ofname):
     chem_dict_r = {}
     spec_list = []
         
-    ofstr = "#!/usr/bin/python\n\nfrom scipy import *\nimport numpy as np\nfrom phy_const import kb, Navo\nimport vulcan_cfg\n\n"
+    ofstr = "#!/usr/bin/python\n\nfrom scipy import *\nimport numpy as np\nfrom phy_const import kb, Navo\nimport vulcan_cfg_Earth\n\n"
     ofstr += "'''\n## Reaction ##\n\n"
     ofstr += re_table + "\n\n"
 
@@ -668,7 +668,7 @@ def make_jac(ni, nr, ofname):
     jac = dy.jacobian(x)
 
     jstr = '\ndef symjac(y, M, k): \n'
-    jstr += '\t nz = vulcan_cfg.nz\n'.expandtabs(3)
+    jstr += '\t nz = vulcan_cfg_Earth.nz\n'.expandtabs(3)
     jstr += '\t dfdy = np.zeros(shape=[ni*nz, ni*nz])   \n'.expandtabs(3)
     jstr += '\t indx = [] \n'.expandtabs(3)
     jstr += '\t for j in range(ni): \n'.expandtabs(3)
@@ -701,7 +701,7 @@ def make_neg_jac(ni, nr, ofname):
     jac = dy.jacobian(x)
 
     jstr = '\ndef neg_symjac(y, M, k): \n'
-    jstr += '\t nz = vulcan_cfg.nz\n'.expandtabs(3)
+    jstr += '\t nz = vulcan_cfg_Earth.nz\n'.expandtabs(3)
     jstr += '\t dfdy = np.zeros(shape=[ni*nz, ni*nz])   \n'.expandtabs(3)
     jstr += '\t indx = [] \n'.expandtabs(3)
     jstr += '\t for j in range(ni): \n'.expandtabs(3)
@@ -719,7 +719,7 @@ def make_neg_jac(ni, nr, ofname):
 def check_conserv():
     from chem_funs import re_dict
     conserv_check = True
-    compo = np.genfromtxt(vulcan_cfg.com_file,names=True,dtype=None)
+    compo = np.genfromtxt(vulcan_cfg_Earth.com_file,names=True,dtype=None)
     compo_row = list(compo['species'])
     # Convert bytes to strings
     compo_row = [sp.decode("utf-8") for sp in compo_row]
