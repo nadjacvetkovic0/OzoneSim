@@ -4,14 +4,13 @@ sys.path.insert(0, '../') # including the upper level of directory for the path 
 import numpy as np 
 import matplotlib.pyplot as plt
 import matplotlib.legend as lg
-import vulcan_cfg
+import vulcan_cfg_Earth
 try: from PIL import Image
 except ImportError: 
     try: import Image
-    except: vulcan_cfg.use_PIL = False
+    except: vulcan_cfg_Earth.use_PIL = False
 import os, sys
 import pickle
-
 
 # Setting the 2nd input argument as the filename of vulcan output   
 vul_data = sys.argv[1]
@@ -20,7 +19,7 @@ plot_spec = sys.argv[2]
 # Setting the 4th input argument as the output eps filename        
 plot_name = sys.argv[3]
 
-plot_dir = '../' + vulcan_cfg.plot_dir
+plot_dir = '../' + vulcan_cfg_Earth.plot_dir
 
 # taking user input species and splitting into separate strings and then converting the list to a tuple
 plot_spec = tuple(plot_spec.split(','))
@@ -76,7 +75,7 @@ for sp in plot_spec:
     
     if sp == 'H2O': plt.plot(data['atm']['sat_p']['H2O']/data['atm']['pco'], data['atm']['zco'][:-1]/1.e5, color=colors[color_index], ls='-.', label='H2O saturation')
         
-        
+     
         
     if sp == 'O3':
         plt.scatter(o3_MH, z_MH, marker='o', color=colors[color_index], facecolor= 'None', alpha=0.7)
@@ -96,9 +95,8 @@ for sp in plot_spec:
         plt.scatter(h2o_us, z_us, marker='o', color=colors[color_index], facecolor= 'None', alpha=0.7)
         plt.errorbar(h2o_us, z_us, xerr=np.vstack((h2o_us*0.9,h2o_us*9)), color=colors[color_index], linestyle='None', alpha=0.7)
         
-    
+  
     color_index +=1
-
 
 plt.gca().set_xscale('log')       
 #plt.gca().set_yscale('log') 
@@ -107,13 +105,6 @@ plt.xlim((1.E-14, 1.e-2))
 plt.ylim((0, 80.))
 #plt.ylim((1.E3,data['atm']['pco'][-1]/1e6))
 plt.legend(frameon=0, prop={'size':13}, loc='best')
-# handles, labels = plt.gca().get_legend_handles_labels()
-# display = range(len(sp_list))
-# #Create custom artists
-# art0 = plt.Line2D((0,0),(0,0), ls='None')
-# Artist1 = plt.Line2D(range(10),range(10), color='black')
-# Artist2 = plt.Line2D((0,1),(0,0), color='black', ls='--',lw=1.5)
-# plt.legend([Artist1,Artist2],['Equilibrium','Kinetics'], frameon=False, prop={'size':12}, loc='best')
 
 plt.xlabel("Mixing Ratio", fontsize=16)
 #plt.ylabel("Pressure (bar)")
@@ -122,7 +113,7 @@ plt.ylabel("Height (km)", fontsize=16)
 plt.title('Earth', fontsize=14)
 plt.savefig(plot_dir + plot_name + '.png')
 plt.savefig(plot_dir + plot_name + '.eps')
-if vulcan_cfg.use_PIL == True:
+if vulcan_cfg_Earth.use_PIL == True:
     plot = Image.open(plot_dir + plot_name + '.png')
     plot.show()
 else: plt.show()
@@ -143,10 +134,6 @@ plt.ylabel("Height (km)")
 #plt.title('HD189733b')
 plt.savefig(plot_dir + plot_name + '-concentration.png')
 plt.savefig(plot_dir + plot_name + '-concentration.eps')
-# if vulcan_cfg.use_PIL == True:
-#     plot = Image.open(plot_dir + plot_name + '-concentration.png')
-#     plot.show()
-# else: plt.show()
 
 plt.figure()
 #plt.plot(data['atm']['sat_p']['H2O']/data['atm']['pco'], data['atm']['zco'][:-1]/1.e5, color='b')
@@ -160,7 +147,7 @@ plt.ylabel("Height (km)", fontsize=12)
 
 plt.savefig(plot_dir + plot_name + '-saturation.png')
 plt.savefig(plot_dir + plot_name + '-saturation.eps')
-if vulcan_cfg.use_PIL == True:
+if vulcan_cfg_Earth.use_PIL == True:
     plot = Image.open(plot_dir + plot_name + '-concentration.png')
     plot.show()
 else: plt.show()
