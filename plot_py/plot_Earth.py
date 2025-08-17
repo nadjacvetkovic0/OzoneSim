@@ -54,7 +54,8 @@ h2o_us = 1e-6/18*100*np.array([3700,2843,1268,554,216,43.2,11.3,3.3,3.3,3.3,4.5,
 with open(vul_data, 'rb') as handle:
   data = pickle.load(handle)
 
-with open('../output/Earth-S-rtol05-st085.vul', 'rb') as handle:
+#with open('../output/Earth-S-rtol05-st085.vul', 'rb') as handle:
+with open('../output/Earth-rtol005.vul', 'rb') as handle:
   data2 = pickle.load(handle)
 
 color_index = 0
@@ -117,7 +118,8 @@ plt.legend(frameon=0, prop={'size':13}, loc='best')
 plt.xlabel("Mixing Ratio", fontsize=16)
 #plt.ylabel("Pressure (bar)")
 plt.ylabel("Height (km)", fontsize=16)
-plt.title('Earth (CIRA equator in January 1986)', fontsize=14)
+#plt.title('Earth (CIRA equator in January 1986)', fontsize=14)
+plt.title('Earth', fontsize=14)
 plt.savefig(plot_dir + plot_name + '.png')
 plt.savefig(plot_dir + plot_name + '.eps')
 if vulcan_cfg.use_PIL == True:
