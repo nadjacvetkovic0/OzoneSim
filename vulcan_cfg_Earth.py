@@ -3,7 +3,8 @@
 # ============================================================================= 
 
 # ====== Setting up the elements included in the network ======
-atom_list = ['H', 'O', 'C', 'Ar', 'N', 'S']
+#atom_list = ['H', 'O', 'C', 'Ar', 'N', 'S']
+atom_list = ['H', 'O', 'C', 'N', 'S']
 use_lowT_limit_rates = False
 
 # ====== Setting up paths and filenames for the input and output files  ======
@@ -36,7 +37,8 @@ ini_mix = 'const_mix' # Options: 'EQ', 'const_mix', 'vulcan_ini', 'table' (for '
 fastchem_met_scale = 1. # scaling factor for other elements in fastchem (e.g., if fastchem_met_scale = 0.1, other elements such as Si and Mg will take 0.1 solar values)
 
 # Initialsing uniform (constant with pressure) mixing ratios (only reads when ini_mix = const_mix)
-const_mix = {'N2':0.78, 'O2':0.20, 'H2O':1e-6,  'CO2':4E-4, 'SO2': 2e-10} 
+#const_mix = {'N2':0.78, 'O2':0.20, 'H2O':1e-6,  'CO2':4E-4, 'Ar':9.34e-3, 'SO2': 2e-10} 
+const_mix = {'N2':0.78, 'O2':0.20, 'H2O':1e-6,  'CO2':4E-4, 'SO2': 2e-8} 
 
 # ====== Setting up photochemistry ======
 use_photo = True

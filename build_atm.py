@@ -137,9 +137,11 @@ class InitialAbun(object):
         
         try: subprocess.check_call(["./fastchem input/config.input"], shell=True, cwd='fastchem_vulcan/') # check_call instead of call can catch the error 
         except: print ('\n FastChem cannot run properly. Try compile it by running make under /fastchem_vulcan\n'); raise
-           
+    
+    print("ini_mix setting =", vulcan_cfg_Earth.ini_mix)       
     def ini_y(self, data_var, data_atm): 
         # initial mixing ratios of the molecules
+        print("ini_mix setting =", vulcan_cfg_Earth.ini_mix)
         
         ini_mol = self.ini_mol()  
         ini = np.zeros(ni)
@@ -191,6 +193,7 @@ class InitialAbun(object):
     
         elif vulcan_cfg_Earth.ini_mix == 'const_mix':
             print ("Initializing with constant (well-mixed): " + str(vulcan_cfg_Earth.const_mix))
+            print("Sum of mixing ratios =", sum(vulcan_cfg_Earth.const_mix.values()))
             for sp in vulcan_cfg_Earth.const_mix.keys():
                 y_ini[:,species.index(sp)] = gas_tot* vulcan_cfg_Earth.const_mix[sp] # this also changes data_var.y
             if vulcan_cfg_Earth.use_ion == True:
