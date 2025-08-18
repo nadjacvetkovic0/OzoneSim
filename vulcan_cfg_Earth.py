@@ -10,7 +10,7 @@ use_lowT_limit_rates = False
 # ====== Setting up paths and filenames for the input and output files  ======
 # input:
 #network = 'thermo/SNCHO_full_photo_network.txt'
-network = 'thermo/SNCHO_earth_photo_network.txt'
+network = 'thermo/SNCHO_full_photo_network.txt'
 use_lowT_limit_rates = False
 gibbs_text = 'thermo/gibbs_text.txt' # (all the nasa9 files must be placed in the folder: thermo/NASA9/)
 cross_folder = 'thermo/photo_cross/'
@@ -39,7 +39,7 @@ fastchem_met_scale = 1. # scaling factor for other elements in fastchem (e.g., i
 
 # Initialsing uniform (constant with pressure) mixing ratios (only reads when ini_mix = const_mix)
 #const_mix = {'N2':0.78, 'O2':0.20, 'H2O':1e-6,  'CO2':4E-4, 'Ar':9.34e-3, 'SO2': 2e-10} 
-const_mix = {'N2':0.78, 'O2':0.20, 'H2O':1e-6,  'CO2':4E-4, 'SO2': 2e-8} 
+const_mix = {'N2':0.78, 'O2':0.20, 'H2O':1e-6,  'CO2':4E-4, 'SO2': 2e-10} 
 
 # ====== Setting up photochemistry ======
 use_photo = True
@@ -107,12 +107,15 @@ max_flux = 1e13  # upper limit for the diffusion-limit fluxes
 remove_list = [315, 316] # in pairs e.g. [1,2]
 
 # == Condensation ======
-use_condense = True
-use_settling = True
-use_relax = ['H2O', 'H2SO4']
+#use_condense = True 
+#use_settling = True
+#use_relax = ['H2O', 'H2SO4'] ja promenila
+use_condense = False
+use_settling = False
+use_relax = []
 humidity = 0.25 # only for water
-r_p = {'H2O_l_s': 0.01, 'H2SO4_l': 1e-4}  # particle radius in cm (1e-4 = 1 micron)
-rho_p = {'H2O_l_s': 0.9, 'H2SO4_l': 1.8302} # particle density in g cm^-3
+#r_p = {'H2O_l_s': 0.01, 'H2SO4_l': 1e-4}  # particle radius in cm (1e-4 = 1 micron)
+#rho_p = {'H2O_l_s': 0.9, 'H2SO4_l': 1.8302} # particle density in g cm^-3
 start_conden_time = 0
 stop_conden_time = 5e8
 condense_sp = ["H2O" , "H2SO4"]      
@@ -172,7 +175,8 @@ use_PIL = True
 live_plot_frq = 10
 save_movie_rate = live_plot_frq
 y_time_freq = 1  #  storing data for every 'y_time_freq' step
-plot_spec = ['H2O', 'H2O_l_s', 'O3',  'CH4', 'NH3' ,'H2SO4','N2O', 'SO2']  
+#plot_spec = ['H2O', 'H2O_l_s', 'O3',  'CH4', 'NH3' ,'H2SO4','N2O', 'SO2']  JA MENJALA
+plot_spec = ['H2O','O3',  'CH4', 'NH3' ,'H2SO4','N2O', 'SO2']  
 # output:
 output_humanread = False
 use_shark = False

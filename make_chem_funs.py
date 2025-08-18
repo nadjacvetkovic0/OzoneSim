@@ -11,12 +11,10 @@ from sympy import lambdify
 ofname = 'chem_funs.py'
 gibbs_text = vulcan_cfg_Earth.gibbs_text
 
-
 # read the network and produce the .txt table for chemdf
 # Re-arrange the numerbers in the network
 def read_network():
-    
-    
+        
     Rf, Rindx = {}, {}
     i = 1
     special_re, photo_re = False, False
@@ -764,41 +762,6 @@ def check_duplicate(nr, photo_re_indx):
                         print ('Re' + str(re) + ' and '+ 'Re' + str(re_oth) +   ' are duplicates!')
     
     if not dup_list: print ('No duplicates in the network.')
-    
-# def make_rate_ans(spec_list, ofname):
-#     '''
-#     make a function for showing individually every production and loss term for each species
-#     '''
-#
-#     ost = 'def rate_ans(sp): \n'
-#     ost += '\t rate_str = {}\n'.expandtabs(3)
-#     ost += '\t re_sp_dic = {}\n'.expandtabs(3)
-#
-#     re_sp_dic = {}
-#     for sp in spec_list:
-#         ost += '    rate_str["'+sp+'"] = ['
-#         re_sp_dic[sp] = []
-#         for i in sp_rate2[sp]:
-#             ost += i
-#             ost += ','
-#             start, end = False, False
-#             for n,letter in enumerate(i):
-#                 if letter == 'k' and start==False:
-#                     k_start=n+2
-#                     start = True
-#                 elif letter == ']' and start==True and end==False:
-#                     k_end = n
-#                     end = True
-#                     re_sp_dic[sp].append(int(i[k_start:k_end]))
-#
-#         ost = ost[0:-1]
-#         ost += ']'
-#         ost += '\n'
-#     ost += '\t return np.array(rate_str[sp]) \n\n'.expandtabs(3)
-#
-#     # save the output function
-#     with open (ofname, 'a+') as f: f.write(ost)
-    
 
 if __name__ == "__main__":   
     re_table, photo_table, photo_re_indx = read_network()
