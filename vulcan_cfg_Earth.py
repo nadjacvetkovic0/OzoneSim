@@ -24,7 +24,7 @@ vul_ini = 'output/' # the file to initialize the abundances for ini_mix = 'vulca
 output_dir = 'output/'
 plot_dir = 'plot/'
 movie_dir = 'plot/movie/'
-out_name =  'Earth-rtol005.vul' # output file name
+out_name =  'Earth-rtol005novi.vul' # output file name
 
 # ====== Setting up the elemental abundance ======
 use_solar = False # True: using the solar abundance from Table 10. K.Lodders 2009; False: using the customized elemental abundance. 
@@ -89,7 +89,7 @@ Tiso = 1000 # only read when atm_type = 'isothermal'
 # T_int, T_irr, ka_L, ka_S, beta_S, beta_L
 para_warm = [120., 1500., 0.1, 0.02, 1., 1.]
 para_anaTP = para_warm
-const_Kzz = 1.E10 # (cm^2/s) Only reads when use_Kzz = True and Kzz_prof = 'const'
+const_Kzz = 1.E6 # (cm^2/s) Only reads when use_Kzz = True and Kzz_prof = 'const' PORMENJENA NA 10^6 zbog veceg accuracyja
 const_vz = 0 # (cm/s) Only reads when use_vz = True and vz_prof = 'const'
 
 # frequency for updating dz and dzi due to change of mu
@@ -107,15 +107,15 @@ max_flux = 1e13  # upper limit for the diffusion-limit fluxes
 remove_list = [315, 316] # in pairs e.g. [1,2]
 
 # == Condensation ======
-#use_condense = True 
-#use_settling = True
-#use_relax = ['H2O', 'H2SO4'] ja promenila
-use_condense = False
-use_settling = False
-use_relax = []
+use_condense = True 
+use_settling = True
+use_relax = ['H2O', 'H2SO4'] #ja promenila
+#use_condense = False
+#use_settling = False
+#use_relax = []
 humidity = 0.25 # only for water
-#r_p = {'H2O_l_s': 0.01, 'H2SO4_l': 1e-4}  # particle radius in cm (1e-4 = 1 micron)
-#rho_p = {'H2O_l_s': 0.9, 'H2SO4_l': 1.8302} # particle density in g cm^-3
+r_p = {'H2O_l_s': 0.01, 'H2SO4_l': 1e-4}  # particle radius in cm (1e-4 = 1 micron)
+rho_p = {'H2O_l_s': 0.9, 'H2SO4_l': 1.8302} # particle density in g cm^-3
 start_conden_time = 0
 stop_conden_time = 5e8
 condense_sp = ["H2O" , "H2SO4"]      
@@ -135,7 +135,7 @@ conv_step = 500
 ode_solver = 'Ros2' # case sensitive
 use_print_prog = True
 use_print_delta = False
-print_prog_num = 500  # print the progress every x steps 
+print_prog_num = 250  # print the progress every x steps, bilo 500 sad 250
 dttry = 1.E-10
 trun_min = 1e2
 runtime = 1.E22
@@ -145,7 +145,7 @@ dt_var_max = 2.
 dt_var_min = 0.5
 count_min = 120
 count_max = int(2E4)
-atol = 1.E-1 # Try decreasing this if the solutions are not stable
+atol = 1.E-2 # Try decreasing this if the solutions are not stable (-1 --> -2)
 mtol = 1.E-22
 mtol_conv = 1.E-16
 pos_cut = 0
@@ -172,7 +172,7 @@ use_save_movie = False
 use_flux_movie = False
 plot_height = False
 use_PIL = True 
-live_plot_frq = 10
+live_plot_frq = 100  # frequency for live plotting
 save_movie_rate = live_plot_frq
 y_time_freq = 1  #  storing data for every 'y_time_freq' step
 #plot_spec = ['H2O', 'H2O_l_s', 'O3',  'CH4', 'NH3' ,'H2SO4','N2O', 'SO2']  JA MENJALA
@@ -181,4 +181,4 @@ plot_spec = ['H2O','O3',  'CH4', 'NH3' ,'H2SO4','N2O', 'SO2']
 output_humanread = False
 use_shark = False
 save_evolution = False   # save the evolution of chemistry (y_time and t_time) for every save_evo_frq step
-save_evo_frq = 10
+save_evo_frq = 100 # frequency for saving the evolution of chemistry

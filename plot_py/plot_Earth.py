@@ -73,9 +73,7 @@ for sp in plot_spec:
     
     plt.plot(data2['variable']['ymix'][:,vulcan_spec2.index(sp)], data2['atm']['zco'][:-1]/1.e5, color=colors[color_index], ls='--')
     
-    if sp == 'H2O': plt.plot(data['atm']['sat_p']['H2O']/data['atm']['pco'], data['atm']['zco'][:-1]/1.e5, color=colors[color_index], ls='-.', label='H2O saturation')
-        
-     
+    if sp == 'H2O': plt.plot(data['atm']['sat_p']['H2O']/data['atm']['pco'], data['atm']['zco'][:-1]/1.e5, color=colors[color_index], ls='-.', label='H2O saturation') 
         
     if sp == 'O3':
         plt.scatter(o3_MH, z_MH, marker='o', color=colors[color_index], facecolor= 'None', alpha=0.7)
@@ -112,7 +110,7 @@ plt.ylabel("Height (km)", fontsize=16)
 #plt.title('Earth (CIRA equator in January 1986)', fontsize=14)
 plt.title('Earth', fontsize=14)
 plt.savefig(plot_dir + plot_name + '.png')
-plt.savefig(plot_dir + plot_name + '.eps')
+#plt.savefig(plot_dir + plot_name + '.eps') ja komentarisala
 if vulcan_cfg_Earth.use_PIL == True:
     plot = Image.open(plot_dir + plot_name + '.png')
     plot.show()
@@ -133,7 +131,7 @@ plt.xlabel("Num density")
 plt.ylabel("Height (km)")
 #plt.title('HD189733b')
 plt.savefig(plot_dir + plot_name + '-concentration.png')
-plt.savefig(plot_dir + plot_name + '-concentration.eps')
+#plt.savefig(plot_dir + plot_name + '-concentration.eps') ja komentarisala
 
 plt.figure()
 #plt.plot(data['atm']['sat_p']['H2O']/data['atm']['pco'], data['atm']['zco'][:-1]/1.e5, color='b')
@@ -146,7 +144,7 @@ plt.ylim((0, 80.))
 plt.ylabel("Height (km)", fontsize=12)
 
 plt.savefig(plot_dir + plot_name + '-saturation.png')
-plt.savefig(plot_dir + plot_name + '-saturation.eps')
+#plt.savefig(plot_dir + plot_name + '-saturation.eps') ja komentarisala
 if vulcan_cfg_Earth.use_PIL == True:
     plot = Image.open(plot_dir + plot_name + '-concentration.png')
     plot.show()

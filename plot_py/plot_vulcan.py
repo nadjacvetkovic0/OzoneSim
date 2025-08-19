@@ -1,6 +1,6 @@
 '''
 This script reads VULCAN output (.vul) files using pickle and plot the species volumn mixing ratios as a function of pressure, with the initial abundances (typically equilibrium) shown in dashed lines.
-Plots are saved in the folder assigned in vulcan_cfg.py, with the default plot_dir = 'plot/'.
+Plots are saved in the folder assigned in vulcan_cfg_Earth.py, with the default plot_dir = 'plot/'.
 '''
 
 import sys
@@ -9,11 +9,11 @@ sys.path.insert(0, '../') # including the upper level of directory for the path 
 import numpy as np 
 import matplotlib.pyplot as plt
 import matplotlib.legend as lg
-import vulcan_cfg
+import vulcan_cfg_Earth
 try: from PIL import Image
 except ImportError: 
     try: import Image
-    except: vulcan_cfg.use_PIL = False
+    except: vulcan_cfg_Earth.use_PIL = False
 import os, sys
 import pickle
 
@@ -28,10 +28,10 @@ plot_spec = sys.argv[2]
 # Setting the 4th input argument as the output eps filename        
 plot_name = sys.argv[3]
 
-plot_dir = '../' + vulcan_cfg.plot_dir
+plot_dir = '../' + vulcan_cfg_Earth.plot_dir
 # Checking if the plot folder exsists
 if not os.path.exists(plot_dir):
-    print ('The plotting directory assigned in vulcan_cfg.py does not exist.')
+    print ('The plotting directory assigned in vulcan_cfg_Earth.py does not exist.')
     print( 'Directory ' , plot_dir,  " created.")
     os.mkdir(plot_dir)
 
@@ -101,7 +101,7 @@ plt.legend(frameon=0, prop={'size':12}, loc='best')
 
 plt.savefig(plot_dir + plot_name + '.png')
 plt.savefig(plot_dir + plot_name + '.eps')
-if vulcan_cfg.use_PIL == True:
+if vulcan_cfg_Earth.use_PIL == True:
     plot = Image.open(plot_dir + plot_name + '.png')
     plot.show()
 else: plt.show()
