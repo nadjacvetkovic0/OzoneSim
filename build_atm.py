@@ -434,56 +434,9 @@ class Atm(object):
         if self.use_vz == False: 
             data_atm.vz = np.zeros(nz-1)   
         
-        # TEST 
-        # moved to calculating g
-        
-        # if self.use_settling == True:
-        # # TESTing settling velocity
-        # # based on L. D. Cloutman: A Database of Selected Transport Coefficients for Combustion Studies (Table 1.)
-        #     if vulcan_cfg_Earth.atm_base == 'N2':
-        #         na = 1.52; a = 1.186e-5; b = 86.54
-        #     elif vulcan_cfg_Earth.atm_base == 'H2':
-        #         na = 1.67; a = 1.936e-6; b = 2.187
-        #     elif vulcan_cfg_Earth.atm_base == 'CO2':
-        #         print ("NO CO2 viscosity yet! (using N2 instead)")
-        #         na = 1.52; a = 1.186e-5; b = 86.54
-        #     elif vulcan_cfg_Earth.atm_base == 'H2O':
-        #         na = 1.5; a = 1.6e-5; b = 0
-        #     elif vulcan_cfg_Earth.atm_base == 'O2':
-        #         na = 1.46; a = 2.294e-5; b = 164.4
-        #
-        #     dmu = a * data_atm.Tco**na /(b + data_atm.Tco) # g cm-1 s-1 dynamic viscosity
-        #
-        #     for sp in vulcan_cfg_Earth.non_gas_sp:
-        #         try:
-        #             rho_p = data_atm.rho_p[sp]
-        #             r_p = data_atm.r_p[sp]
-        #
-        #        # if sp == 'H2O_l_s':
-        #        #      rho_p = data_atm.rho_p_h2o
-        #        #      r_p = data_atm.r_p_h2o
-        #        #  elif sp == 'H2SO4_l':
-        #        #      rho_p = 1.8302
-        #        #      r_p = data_atm.r_p_h2so4
-        #        #  elif sp == 'H2SO4_l':
-        #        #      rho_p = 1.8302
-        #        #      r_p = data_atm.r_p_h2so4
-        #
-        #         except: print (sp + " has not been prescribed size and density!");raise
-        #
-        #         # Calculating the setteling (terminal) velocity
-        #         data_atm.vs[:,species.index(sp)] = -1. *(2./9*rho_p * r_p**2 * data_atm.g / dmu[1:])
-        
         # calculating and storing M(the third body)
         data_atm.M = data_atm.pco/(kb*data_atm.Tco)
         data_atm.n_0 = data_atm.M.copy()
-        
-        # moved to f_mu_dz()
-        # # plot T-P profile
-        # if vulcan_cfg_Earth.plot_TP == True: output.plot_TP(data_atm)
-        #
-        # # print warning when T exceeds the valid range of Gibbs free energy (NASA polynomials)
-        # if np.any(np.logical_or(data_atm.Tco < 200, data_atm.Tco > 6000)): print ('Temperatures exceed the valid range of Gibbs free energy.\n')
         
         return data_atm
         
@@ -656,9 +609,6 @@ class Atm(object):
          
         print ("The stellar flux is interpolated onto uniform grid of " +str(vulcan_cfg_Earth.dbin1) + " (<" +str(vulcan_cfg_Earth.dbin_12trans)+" nm) and "+str(vulcan_cfg_Earth.dbin2)\
         + " (>="+str(vulcan_cfg_Earth.dbin_12trans)+" nm)" + " and conserving " + "{:.2f}".format(100* sum_bin/sum_orgin)+" %" + " energy." )
-        #print (str(100* sum_old/sum_orgin)+" %" )
-
-
     
     def mol_diff(self, atm):
         '''
@@ -776,7 +726,7 @@ class Atm(object):
                         atm.bot_fix_sp[species.index(li[0])] = li[3]
     
     # TEST condensation
-    def sp_sat(self, atm):
+    """def sp_sat(self, atm):
         '''
         For all the species in vulcan_cfg_Earth.condense_sp, pre-calculating the  
         saturation varpor pressure (in dyne/cm2) and storing in atm.sat_p. 
@@ -852,8 +802,160 @@ class Atm(object):
                 h2s_l_log10 = -1145./T + 7.94746 - 0.00322*T     # 187.6 < T <= 213.2
                 
                 saturate_p = 10**( (T <= 187.6)*h2s_ice_log10 + (T > 187.6)*h2s_l_log10 )
-                atm.sat_p[sp] = saturate_p * 0.001333 * 1.e6
+                atm.sat_p[sp] = saturate_p * 0.001333 * 1.e6 """
 
+   # etst kondenzacije
+    def sp_sat(self, atm):
+        """
+        Za sve vrste u vulcan_cfg_Earth.condense_sp, izračunava se 
+        zasićeni pritisak pare (u dyne/cm^2, cgs) i smešta u atm.sat_p[sp].
+
+        ***podaci***
+        - H2O: Murphy & Koop (2005) – najbolja formula za vodu i led
+        - NH3: NIST WebBook Antoine koeficijenti
+        - H2SO4: Ayers et al. (1980) – i dalje standard u literaturi
+        - S2, S4, S8: Zahnle (2016/2017) / Lyons (2008)
+        - C: grafit – fit sa NIST/JANAF baze
+        - H2S: NIST WebBook Antoine koeficijenti
+
+        --> Svi rezultati su u dyne/cm^2 (cgs sistem).
+        """
+
+        # Dodata i S4 jer ima formulu niže
+        sat_sp_list = ['H2O', 'NH3', 'H2SO4', 'S2', 'S4', 'S8', 'C', 'H2S']
+
+        T = np.copy(atm.Tco)   # temperatura u K
+        nz = T.size
+
+        #konverzije jedinica
+        BAR_TO_CGS = 1e6        # bar → dyne/cm^2
+        ATM_TO_CGS = 1.01325e6  # atm → dyne/cm^2
+        PA_TO_CGS  = 10.0       # Pa  → dyne/cm^2
+
+        for sp in vulcan_cfg_Earth.condense_sp:
+            if sp not in sat_sp_list:
+                raise IOError(f"Nema podataka za zasićenje za {sp}. Pogledaj sp_sat u build_atm.py")
+
+            # ---------- VODA (Murphy & Koop, 2005) ----------
+            if sp == "H2O":
+                # Koristimo formulu koja važi i za led i za tečnu vodu.
+                Ti = T
+
+                # ln(p_ice) u Pascalima
+                ln_p_ice = (
+                    9.550426
+                    - 5723.265 / Ti
+                    + 3.53068 * np.log(Ti)
+                    - 0.00728332 * Ti
+                )
+
+                # ln(p_liq) u Pascalima (sa tanh prelazom kod superohlađene vode)
+                ln_p_liq = (
+                    54.842763
+                    - 6763.22 / Ti
+                    - 4.210 * np.log(Ti)
+                    + 0.000367 * Ti
+                    + np.tanh(0.0415 * (Ti - 218.8)) * (
+                        53.878
+                        - 1331.22 / Ti
+                        - 9.44523 * np.log(Ti)
+                        + 0.014025 * Ti
+                    )
+                )
+
+                # Ako je ispod 0°C koristi led, inače tečnost
+                p_pa = np.where(Ti <= 273.15, np.exp(ln_p_ice), np.exp(ln_p_liq))
+                atm.sat_p[sp] = p_pa * PA_TO_CGS
+
+            # ---------- AMONIJAK (NH3, NIST WebBook) ----------
+            elif sp == "NH3":
+                # Antoine jednačina: log10 P(bar) = A - B / (T + C)
+                # Dva intervala temperature iz NIST baze
+                A1, B1, C1 = 3.49123,  404.176, -18.02    # 164–239.6 K
+                A2, B2, C2 = 3.76223, 1203.835, -47.48    # 239.6–371.5 K
+
+                P_bar = np.empty_like(T)
+
+                #niža temperatura
+                mask1 = (T >= 164.0) & (T <= 239.6)
+                P_bar[mask1] = 10.0 ** (A1 - B1 / (T[mask1] + C1))
+
+                #viša temperatura
+                mask2 = (T > 239.6) & (T <= 371.5)
+                P_bar[mask2] = 10.0 ** (A2 - B2 / (T[mask2] + C2))
+
+                #ako izađe van granica, uzima najbliži fit
+                mask_lo = T < 164.0
+                mask_hi = T > 371.5
+                if np.any(mask_lo):
+                    P_bar[mask_lo] = 10.0 ** (A1 - B1 / (np.clip(T[mask_lo], 120.0, None) + C1))
+                if np.any(mask_hi):
+                    P_bar[mask_hi] = 10.0 ** (A2 - B2 / (np.clip(T[mask_hi], None, 500.0) + C2))
+
+                atm.sat_p[sp] = P_bar * BAR_TO_CGS
+
+            # ---------- SUMPORNA KISELINA ----------
+            elif sp == "H2SO4":
+                # I dalje se koristi stara ali pouzdana formula Ayers et al. (1980)
+                p_atm = np.exp(-10156.0 / T + 16.259)
+                atm.sat_p[sp] = p_atm * ATM_TO_CGS
+
+            # ---------- S2 ----------
+            elif sp == "S2":
+                # Zahnle (2017) refit, različito ispod i iznad 413 K
+                out = np.zeros(nz)
+                m1 = T < 413.0
+                m2 = ~m1
+                out[m1] = np.exp(27.0 - 18500.0 / T[m1]) * BAR_TO_CGS
+                out[m2] = np.exp(16.1 - 14000.0 / T[m2]) * BAR_TO_CGS
+                atm.sat_p[sp] = out
+
+            # ---------- S4 ----------
+            elif sp == "S4":
+                # Lyons (2008) fit
+                p_atm = 10.0 ** (6.0028 - 6047.5 / T)
+                atm.sat_p[sp] = p_atm * ATM_TO_CGS
+
+            # ---------- S8 ----------
+            elif sp == "S8":
+                # Zahnle (2017) refit, isto kao i za S2
+                out = np.zeros(nz)
+                m1 = T < 413.0
+                m2 = ~m1
+                out[m1] = np.exp(20.0 - 11800.0 / T[m1]) * BAR_TO_CGS
+                out[m2] = np.exp(9.6 - 7510.0  / T[m2]) * BAR_TO_CGS
+                atm.sat_p[sp] = out
+
+            # ---------- C ----------
+            elif sp == "C":
+                # Fit za sublimaciju grafita (NIST/JANAF)
+                a = 3.27860e+01
+                b = -8.65139e+04
+                c = 4.80395e-01
+                atm.sat_p[sp] = np.exp(a + b / (T + c))  # već u cgs
+
+            # ---------- H2S ----------
+            elif sp == "H2S":
+                # Antoine parametri iz NIST-a
+                A1, B1, C1 = 3.93727,  573.226, -33.23     # 187.64–212.82 K
+                A2, B2, C2 = 3.76590, 1171.530, -48.78     # 212.82–373.53 K
+
+                P_bar = np.empty_like(T)
+                m1 = (T >= 187.64) & (T <= 212.82)
+                m2 = (T > 212.82) & (T <= 373.53)
+                P_bar[m1] = 10.0 ** (A1 - B1 / (T[m1] + C1))
+                P_bar[m2] = 10.0 ** (A2 - B2 / (T[m2] + C2))
+
+                # Ako izađe van granica, produžavamo najbliži fit
+                mlo = T < 187.64
+                mhi = T > 373.53
+                if np.any(mlo):
+                    P_bar[mlo] = 10.0 ** (A1 - B1 / (np.clip(T[mlo], 150.0, None) + C1))
+                if np.any(mhi):
+                    P_bar[mhi] = 10.0 ** (A2 - B2 / (np.clip(T[mhi], None, 500.0) + C2))
+
+                atm.sat_p[sp] = P_bar * BAR_TO_CGS
+    
             
 if __name__ == "__main__":
     print("This module stores classes for constructing atmospheric structure \
